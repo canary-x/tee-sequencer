@@ -63,5 +63,4 @@ func handle(resp http.ResponseWriter, req *http.Request) {
 		http.Error(resp, fmt.Sprintf("error encoding response: %v", err), http.StatusInternalServerError)
 		return
 	}
-	resp.WriteHeader(http.StatusOK)
 }
