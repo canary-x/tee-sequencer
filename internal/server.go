@@ -7,31 +7,21 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/canary-x/tee-sequencer/pkg/api"
 	"github.com/mdlayher/vsock"
 )
 
 func Run() error {
-	var (
-		ln  net.Listener
-		err error
-	)
 	cfg, err := ParseConfig()
 	if err != nil {
 		return fmt.Errorf("parsing config: %w", err)
 	}
 
-	if cfg.VSockPort == 0 {
-		// fallback to run on http for local testing
-		if ln, err = net.Listen("http", fmt.Sprintf(":%d", cfg.HTTPPort)); err != nil {
-			return fmt.Errorf("error setting up http listener: %w", err)
-		}
-	} else {
-		// else run on a proper vsock
-		if ln, err = vsock.Listen(cfg.VSockPort, nil); err != nil {
-			return fmt.Errorf("error setting up vsock listener: %w", err)
-		}
+	ln, err := listen(cfg)
+	if err != nil {
+		return fmt.Errorf("listening on socket: %w", err)
 	}
 	defer ln.Close()
 
@@ -44,6 +34,15 @@ func Run() error {
 
 	log.Println("Server terminated")
 	return nil
+}
+
+func listen(cfg Config) (net.Listener, error) {
+	ln, err := vsock.Listen(cfg.VSockPort, nil)
+	if err != nil && strings.Contains(err.Error(), "vsock: not implemented") {
+		log.Println("OS does not support vsock: falling back to regular TCP socket")
+		return net.Listen("tcp", fmt.Sprintf(":%d", cfg.VSockPort))
+	}
+	return ln, err
 }
 
 func handle(resp http.ResponseWriter, req *http.Request) {
@@ -63,5 +62,4 @@ func handle(resp http.ResponseWriter, req *http.Request) {
 		http.Error(resp, fmt.Sprintf("error encoding response: %v", err), http.StatusInternalServerError)
 		return
 	}
-	resp.WriteHeader(http.StatusOK)
 }
