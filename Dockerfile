@@ -7,11 +7,11 @@ COPY ./ ./
 RUN CGO_ENABLED=0 go build -o sequencer ./cmd/sequencer
 
 
-FROM gcr.io/distroless/base
-
-# required for Go to operate, as the the home env var is not set in the nitro enclave
-ENV HOME /root
+# Empty image to minimise footprint and maximise security
+FROM scratch
 
 COPY --from=builder /app/sequencer .
+
+ENV VSOCK_PORT 8080
 
 CMD ["./sequencer"]
