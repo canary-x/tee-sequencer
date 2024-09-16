@@ -7,15 +7,11 @@ import (
 )
 
 type Config struct {
-	VSockPort uint32 `envconfig:"VSOCK_PORT"`
-	HTTPPort  uint32 `envconfig:"HTTP_PORT"`
+	VSockPort uint32 `envconfig:"VSOCK_PORT" default:"8080"`
 }
 
 func (c *Config) Validate() error {
-	if c.VSockPort == 0 && c.HTTPPort == 0 {
-		return fmt.Errorf("either VSOCK_PORT or HTTP_PORT must be set")
-	}
-	return nil
+	return nil // unnecessary for now, but can implement something in the future
 }
 
 func ParseConfig() (Config, error) {

@@ -9,6 +9,12 @@ Set up to run in an AWS Nitro Enclave.
 - add support for SIGINT and SIGTERM signals
 - replace with efficient protobuf implementation
 
+## Development
+
+Nitro enclaves only allow vsock networking, with Linux being the only OS supporting it.
+When developing on other OSes, you can either use docker or simply run the sequencer as is, which will detect the lack
+of vsock support and fall back to a regular TCP socket.
+
 ## Building the Nitro enclave
 
 ### Prerequisites
