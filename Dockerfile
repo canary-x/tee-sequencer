@@ -1,6 +1,3 @@
-# How to build and run from this projects' root dir
-# docker build -t com.github.canary-x.tee-sequencer .
-# docker run -it --rm com.github.canary-x.tee-sequencer
 FROM golang:1.22.6 as builder
 WORKDIR /app
 COPY ./ ./
@@ -13,5 +10,7 @@ FROM scratch
 COPY --from=builder /app/sequencer .
 
 ENV VSOCK_PORT 8080
+
+EXPOSE 8080
 
 CMD ["./sequencer"]
