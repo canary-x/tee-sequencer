@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-	"errors"
 	"log"
 
 	"github.com/bufbuild/connect-go"
@@ -21,10 +20,9 @@ var _ blockchainv1connect.PingServiceHandler = (*PingServiceHandler)(nil)
 func (h *PingServiceHandler) Ping(
 	context.Context, *connect.Request[v1.PingRequest],
 ) (*connect.Response[v1.PingResponse], error) {
-	//return connect.NewResponse(&v1.PingResponse{
-	//	Message: "pong",
-	//}), nil
-	return nil, errors.New("lak")
+	return connect.NewResponse(&v1.PingResponse{
+		Message: "pong",
+	}), nil
 }
 
 type SequencerServiceHandler struct{}
@@ -39,7 +37,6 @@ func (h *SequencerServiceHandler) Shuffle(
 	_ context.Context, req *connect.Request[v1.ShuffleRequest],
 ) (*connect.Response[v1.ShuffleResponse], error) {
 	log.Println("Handling shuffle request")
-	panic("lol")
 	return connect.NewResponse(&v1.ShuffleResponse{
 		Transactions: req.Msg.Transactions,
 		Signature:    nil,
