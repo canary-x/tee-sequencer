@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package blockchain.v1;
+
+service PingService {
+  rpc Ping (PingRequest) returns (PingResponse) {}
+}
+
+message PingRequest {}
+
+message PingResponse {
+  string message = 10;
+}
+
+service SequencerService {
+  rpc Shuffle (ShuffleRequest) returns (ShuffleResponse) {}
+}
+
+message Transaction {
+  bytes tx_hash = 10;
+  bytes account = 20;
+  bytes nonce = 30;
+}
+
+message ShuffleRequest {
+  repeated Transaction transactions = 10;
+}
+
+message ShuffleResponse {
+  repeated Transaction transactions = 10;
+  bytes signature = 20;
+}

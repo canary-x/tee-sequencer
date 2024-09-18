@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -9,7 +8,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/canary-x/tee-sequencer/pkg/api"
+	"github.com/bufbuild/connect-go"
+	"github.com/canary-x/tee-sequencer/gen/proto/go/blockchain/v1/blockchainv1connect"
 	"github.com/mdlayher/vsock"
 )
 
@@ -25,9 +25,14 @@ func Run() error {
 	}
 	defer ln.Close()
 
-	log.Println("Listening for transactions on vsock...")
+	log.Println("Listening for transactions...")
 
-	err = http.Serve(ln, http.HandlerFunc(handle))
+	interceptors := connect.WithInterceptors(ConnectErrorInterceptor())
+	srv := NewConnectServer(cfg.Connect).
+		WithHandler(blockchainv1connect.NewPingServiceHandler(NewPingServiceHandler(), interceptors)).
+		WithHandler(blockchainv1connect.NewSequencerServiceHandler(NewSequencerServiceHandler(), interceptors))
+
+	err = srv.Serve(ln)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("serving http: %w", err)
 	}
@@ -43,23 +48,4 @@ func listen(cfg Config) (net.Listener, error) {
 		return net.Listen("tcp", fmt.Sprintf(":%d", cfg.VSockPort))
 	}
 	return ln, err
-}
-
-func handle(resp http.ResponseWriter, req *http.Request) {
-	var batch api.TransactionBatch
-	err := json.NewDecoder(req.Body).Decode(&batch)
-	if err != nil {
-		http.Error(resp, fmt.Sprintf("error decoding request: %v", err), http.StatusBadRequest)
-		return
-	}
-
-	// Don't do any sorting for now, just keep them as they are
-	sortedBatch := api.TransactionBatchSorted{
-		Transactions: batch.Transactions,
-	}
-
-	if err := json.NewEncoder(resp).Encode(sortedBatch); err != nil {
-		http.Error(resp, fmt.Sprintf("error encoding response: %v", err), http.StatusInternalServerError)
-		return
-	}
 }

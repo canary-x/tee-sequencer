@@ -12,5 +12,4 @@ type TransactionBatch struct {
 
 type TransactionBatchSorted struct {
 	Transactions []Transaction `json:"transactions"`
-	// TODO include a signature
 }
