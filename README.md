@@ -7,13 +7,19 @@ Set up to run in an AWS Nitro Enclave.
 - add a linter
 - find a way to expose logs to the host
 - add support for SIGINT and SIGTERM signals
-- replace with efficient protobuf implementation
+- add signature to response
+- implement actual shuffling
 
 ## Development
 
 Nitro enclaves only allow vsock networking, with Linux being the only OS supporting it.
 When developing on other OSes, you can either use docker or simply run the sequencer as is, which will detect the lack
 of vsock support and fall back to a regular TCP socket.
+
+### Dependencies
+- go 1.21 or later
+- make
+- buf (install via `make deps`)
 
 ## Building the Nitro enclave
 
@@ -93,23 +99,25 @@ socat TCP-LISTEN:8080,reuseaddr,fork VSOCK-CONNECT:$VSOCK:8080 &
 Then you can submit test transactions to the enclave:
 
 ```shell
-curl --location --request GET 'http://localhost:8080' \
+curl --location 'http://localhost:8080/blockchain.v1.SequencerService/Shuffle' \
 --header 'Content-Type: application/json' \
 --data '{
     "transactions": [
         {
-            "tx_hash": "hash-1",
-            "account": "account-1",
-            "nonce": 1
+            "tx_hash": "aGFzaC0x",
+            "account": "YWNjb3VudC0x",
+            "nonce": "bm9uY2Ux"
         },
         {
-            "tx_hash": "hash-1",
-            "account": "account-1",
-            "nonce": 2
+            "tx_hash": "aGFzaC0y",
+            "account": "YWNjb3VudC0y",
+            "nonce": "bm9uY2Uy"
         }
     ]
 }'
 ```
+
+Note: protobuf byte fields are represented as base64 strings when using application/json encoding.
 
 Cleanup:
 
@@ -117,3 +125,7 @@ Cleanup:
 nitro-cli terminate-enclave --enclave-id $(nitro-cli describe-enclaves | jq -r '.[] | select(.EnclaveName == "sequencer") | .EnclaveID')
 ps aux | grep socat | grep -v grep | awk '{print $2}' | xargs -r sudo kill -9
 ```
+
+## Documentation
+
+Curious about how this tech works? Check out our in-depth [documentation](DOC.md).

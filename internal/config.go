@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	VSockPort uint32 `envconfig:"VSOCK_PORT" default:"8080"`
+	Connect   ConnectHandlerOptions
 }
 
 func (c *Config) Validate() error {
