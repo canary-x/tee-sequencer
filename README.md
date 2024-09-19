@@ -4,6 +4,7 @@ Responsible for shuffling sequences of Ethereum transactions in a nonce-honoring
 Set up to run in an AWS Nitro Enclave.
 
 ## Work in progress
+
 - add a linter
 - find a way to expose logs to the host
 - add support for SIGINT and SIGTERM signals
@@ -17,6 +18,7 @@ When developing on other OSes, you can either use docker or simply run the seque
 of vsock support and fall back to a regular TCP socket.
 
 ### Dependencies
+
 - go 1.21 or later
 - make
 - buf (install via `make deps`)
@@ -43,9 +45,9 @@ The output should be as follows:
 {
   "Measurements": {
     "HashAlgorithm": "Sha384 { ... }",
-    "PCR0": "a2d89ca2c8f451fa469a67c4282a9be33375802deb6264e82ce93a8551fe451bcdf90c69661570844f40696964a24e0c",
-    "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
-    "PCR2": "b9201487cba85799674dc2df05ba9ec34bf3d7779dd1a2c8c7e491b8395d58d6265a0ef57735d4a860f2b1cdf261805a"
+    "PCR0": "1d91531c44241c530d4e6cdab913d5ca348d0922bd13a3b26ce75edf0c249707b38b1a53ac39461e79ae82c483e695ee",
+    "PCR1": "...(this depends on your host instance)...",
+    "PCR2": "a82e249a0453597c949a0ed2a2b223f1febd61c320a265036eb61bf5a3397d2603e19d7cb930ccf8d5bb2ee720fd9c13"
   }
 }
 ```
@@ -75,12 +77,7 @@ The output should be something like:
   "MemoryMiB": 512,
   "State": "RUNNING",
   "Flags": "DEBUG_MODE",
-  "Measurements": {
-    "HashAlgorithm": "Sha384 { ... }",
-    "PCR0": "a2d89ca2c8f451fa469a67c4282a9be33375802deb6264e82ce93a8551fe451bcdf90c69661570844f40696964a24e0c",
-    "PCR1": "4b4d5b3661b3efc12920900c80e126e4ce783c522de6c02a2a5bf7af3a2b9327b86776f188e4be1c1c404a129dbda493",
-    "PCR2": "b9201487cba85799674dc2df05ba9ec34bf3d7779dd1a2c8c7e491b8395d58d6265a0ef57735d4a860f2b1cdf261805a"
-  }
+  "Measurements": "..."
 }
 ```
 
@@ -125,6 +122,13 @@ Cleanup:
 nitro-cli terminate-enclave --enclave-id $(nitro-cli describe-enclaves | jq -r '.[] | select(.EnclaveName == "sequencer") | .EnclaveID')
 ps aux | grep socat | grep -v grep | awk '{print $2}' | xargs -r sudo kill -9
 ```
+
+### Collecting logs
+
+A special zap logger will stream logs to both the console and a vsock connection.
+Console logs are only visible in DEBUG mode, which is why there's a necessity for an additional stream.
+In order to collect logs, run the special [nitro-logger](https://github.com/canary-x/nitro-logger) as a service on your
+parent instance, on port 9000.
 
 ## Documentation
 
