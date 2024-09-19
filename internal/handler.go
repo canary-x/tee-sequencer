@@ -2,11 +2,11 @@ package internal
 
 import (
 	"context"
-	"log"
 
 	"github.com/bufbuild/connect-go"
 	v1 "github.com/canary-x/tee-sequencer/gen/proto/go/blockchain/v1"
 	"github.com/canary-x/tee-sequencer/gen/proto/go/blockchain/v1/blockchainv1connect"
+	"github.com/canary-x/tee-sequencer/internal/logger"
 )
 
 type PingServiceHandler struct{}
@@ -36,7 +36,7 @@ var _ blockchainv1connect.SequencerServiceHandler = (*SequencerServiceHandler)(n
 func (h *SequencerServiceHandler) Shuffle(
 	_ context.Context, req *connect.Request[v1.ShuffleRequest],
 ) (*connect.Response[v1.ShuffleResponse], error) {
-	log.Println("Handling shuffle request")
+	logger.Instance().Debug("Handling shuffle request")
 	return connect.NewResponse(&v1.ShuffleResponse{
 		Transactions: req.Msg.Transactions,
 		Signature:    nil,

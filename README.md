@@ -4,6 +4,7 @@ Responsible for shuffling sequences of Ethereum transactions in a nonce-honoring
 Set up to run in an AWS Nitro Enclave.
 
 ## Work in progress
+
 - add a linter
 - find a way to expose logs to the host
 - add support for SIGINT and SIGTERM signals
@@ -17,6 +18,7 @@ When developing on other OSes, you can either use docker or simply run the seque
 of vsock support and fall back to a regular TCP socket.
 
 ### Dependencies
+
 - go 1.21 or later
 - make
 - buf (install via `make deps`)
@@ -125,6 +127,13 @@ Cleanup:
 nitro-cli terminate-enclave --enclave-id $(nitro-cli describe-enclaves | jq -r '.[] | select(.EnclaveName == "sequencer") | .EnclaveID')
 ps aux | grep socat | grep -v grep | awk '{print $2}' | xargs -r sudo kill -9
 ```
+
+### Collecting logs
+
+A special zap logger will stream logs to both the console and a vsock connection.
+Console logs are only visible in DEBUG mode, which is why there's a necessity for an additional stream.
+In order to collect logs, run the special [nitro-logger](https://github.com/canary-x/nitro-logger) as a service on your
+parent instance, on port 9000.
 
 ## Documentation
 

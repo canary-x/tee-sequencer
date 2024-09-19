@@ -3,29 +3,32 @@ package internal
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"strings"
 
 	"github.com/bufbuild/connect-go"
 	"github.com/canary-x/tee-sequencer/gen/proto/go/blockchain/v1/blockchainv1connect"
+	"github.com/canary-x/tee-sequencer/internal/config"
+	"github.com/canary-x/tee-sequencer/internal/logger"
 	"github.com/mdlayher/vsock"
 )
 
 func Run() error {
-	cfg, err := ParseConfig()
+	cfg, err := config.Parse()
 	if err != nil {
 		return fmt.Errorf("parsing config: %w", err)
 	}
 
-	ln, err := listen(cfg)
+	log := logger.Init(cfg)
+
+	ln, err := listen(cfg, log)
 	if err != nil {
 		return fmt.Errorf("listening on socket: %w", err)
 	}
 	defer ln.Close()
 
-	log.Println("Listening for transactions...")
+	log.Info("Listening for transactions...")
 
 	interceptors := connect.WithInterceptors(ConnectErrorInterceptor())
 	srv := NewConnectServer(cfg.Connect).
@@ -37,14 +40,14 @@ func Run() error {
 		return fmt.Errorf("serving http: %w", err)
 	}
 
-	log.Println("Server terminated")
+	log.Info("Server terminated")
 	return nil
 }
 
-func listen(cfg Config) (net.Listener, error) {
+func listen(cfg config.Config, log logger.Logger) (net.Listener, error) {
 	ln, err := vsock.Listen(cfg.VSockPort, nil)
 	if err != nil && strings.Contains(err.Error(), "vsock: not implemented") {
-		log.Println("OS does not support vsock: falling back to regular TCP socket")
+		log.Warn("OS does not support vsock: falling back to regular TCP socket")
 		return net.Listen("tcp", fmt.Sprintf(":%d", cfg.VSockPort))
 	}
 	return ln, err

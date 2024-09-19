@@ -10,6 +10,7 @@ FROM scratch
 COPY --from=builder /app/sequencer .
 
 ENV VSOCK_PORT 8080
+ENV VSOCK_LOG 9000
 
 EXPOSE 8080
 
