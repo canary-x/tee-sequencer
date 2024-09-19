@@ -69,7 +69,7 @@ func (l *ZapLogger) Error(msg string, v ...any) {
 
 func newZapVSockLogger(cfg config.Config) *ZapLogger {
 	var z *zap.Logger
-	vsockConn, vsockErr := vsock.Dial(vsock.Host, cfg.LogVSockPort, &vsock.Config{})
+	vsockConn, vsockErr := vsock.Dial(cfg.LogVSockCID, cfg.LogVSockPort, &vsock.Config{})
 	// no need to vsockConn.Close() as this won't be closed until the application exits
 	if vsockErr == nil {
 		z = initZapLoggerWithVsock(vsockConn)
