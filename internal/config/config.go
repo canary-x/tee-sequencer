@@ -9,7 +9,7 @@ import (
 
 type Config struct {
 	VSockPort    uint32 `envconfig:"VSOCK_PORT" default:"8080"`     // port on which the server listens
-	LogVSockPort uint32 `envconfig:"LOG_VSOCK_PORT" default:"9000"` // port to which logs should be streamed
+	LogVSockPort uint32 `envconfig:"LOG_VSOCK_PORT" default:"8090"` // port to which logs should be streamed
 	Connect      ConnectHandlerOptions
 }
 
