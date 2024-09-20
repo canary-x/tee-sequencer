@@ -1,8 +1,10 @@
 package internal
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/canary-x/tee-sequencer/internal/config"
 	"github.com/hf/nsm"
@@ -40,6 +42,7 @@ type secureNSM struct {
 func (s *secureNSM) Attest(data []byte) ([]byte, error) {
 	res, err := s.session.Send(&request.Attestation{
 		UserData: data,
+		Nonce:    int64ToBytes(time.Now().UnixMilli()),
 	})
 	if nil != err {
 		return nil, fmt.Errorf("sending attestation request: %w", err)
@@ -51,6 +54,12 @@ func (s *secureNSM) Attest(data []byte) ([]byte, error) {
 		return nil, errors.New("NSM device did not return an attestation")
 	}
 	return res.Attestation.Document, nil
+}
+
+func int64ToBytes(i int64) []byte {
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, uint64(i))
+	return b
 }
 
 type fakeNSM struct{}
