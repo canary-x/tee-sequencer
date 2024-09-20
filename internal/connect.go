@@ -68,8 +68,13 @@ func ConnectErrorInterceptor() connect.UnaryInterceptorFunc {
 			}()
 			resp, err = next(ctx, req)
 			if err != nil {
-				log.Error("Error in Connect handler: %s\n", err)
-				err = connect.NewError(connect.CodeInternal, err)
+				var connectErr *connect.Error
+				if !errors.As(err, &connectErr) || connectErr.Code() == connect.CodeInternal {
+					log.Error("Error in Connect handler: %s\n", err)
+					if connectErr == nil {
+						err = connect.NewError(connect.CodeInternal, err)
+					}
+				}
 			}
 			return
 		}

@@ -48,9 +48,13 @@ func (h *SequencerServiceHandler) Shuffle(
 
 	attestation, err := AttestSequence(sequenceIn, sequenceOut, h.nsm)
 	if err != nil {
-		if errors.Is(err, errInvalidTransactionHash{}) { // TODO does this work or do we need to use errors.As?
+		var errInvalidTransactionHash errInvalidTransactionHash
+		if errors.As(err, &errInvalidTransactionHash) {
+			// client error
 			return nil, connect.NewError(connect.CodeInvalidArgument, err)
 		}
+		// server error
+		return nil, err
 	}
 	log.Debug("Attestation created")
 
