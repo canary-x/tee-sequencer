@@ -11,5 +11,6 @@
 ### vendor ###
 vendor
 
-# binaries
+# build artifacts
 sequencer
+sequencer.eif

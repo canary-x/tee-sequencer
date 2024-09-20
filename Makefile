@@ -16,7 +16,11 @@ build: ## build sequencer
 
 .PHONY: docker/build
 docker/build: ## build sequencer docker image
-	docker build -t com.github.canary-x.tee-sequencer .
+	docker build -t com.github.canary-x.tee-sequencer:latest .
+
+.PHONY: build/enclave
+build/enclave: docker/build ## build nitro enclave, only works on an EC2 instance with the nitro cli
+	nitro-cli build-enclave --docker-uri com.github.canary-x.tee-sequencer:latest --output-file sequencer.eif
 
 .PHONY: proto
 proto: proto/lint proto/gen ## lint and generate proto files
@@ -40,3 +44,6 @@ proto/setup: ## install proto generation dependencies
 	buf --version | grep ${BUF_VERSION} || ${GO} install github.com/bufbuild/buf/cmd/buf@v${BUF_VERSION}
 	protoc-gen-go --version | grep ${PROTOC_GEN_GO_VERSION} || ${GO} install google.golang.org/protobuf/cmd/protoc-gen-go@v${PROTOC_GEN_GO_VERSION}
 
+.PHONY: start
+start: ## start sequencer as a Nitro instance
+	@./scripts/start.sh

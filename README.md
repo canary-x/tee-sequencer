@@ -35,8 +35,7 @@ of vsock support and fall back to a regular TCP socket.
 ### Build
 
 ```shell
-make docker/build
-nitro-cli build-enclave --docker-uri com.github.canary-x.tee-sequencer:latest --output-file sequencer.eif
+make build/enclave
 ```
 
 The output should be as follows:
