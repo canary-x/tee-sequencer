@@ -11,7 +11,12 @@ type Config struct {
 	VSockPort    uint32 `envconfig:"VSOCK_PORT" default:"8080"`     // port on which the server listens
 	LogVSockPort uint32 `envconfig:"LOG_VSOCK_PORT" default:"8090"` // port to which logs should be streamed
 	LogVSockCID  uint32 `envconfig:"LOG_VSOCK_CID" default:"3"`     // CID of the vsock on the host
-	Connect      ConnectHandlerOptions
+
+	// SecureEnclave should be set to true when running in Nitro. When unset or false, it allows developers to run
+	// this software on their local machines with a fake implementation of the Nitro Secure Module.
+	SecureEnclave bool `envconfig:"SECURE_ENCLAVE" default:"false"`
+
+	Connect ConnectHandlerOptions
 }
 
 func (c *Config) Validate() error {

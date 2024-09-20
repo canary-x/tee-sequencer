@@ -25,7 +25,8 @@ type ZapLogger struct {
 }
 
 func Init(cfg config.Config) Logger {
-	return newZapVSockLogger(cfg)
+	logger = newZapVSockLogger(cfg)
+	return logger
 }
 
 func Instance() Logger {

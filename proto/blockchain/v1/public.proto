@@ -28,5 +28,5 @@ message ShuffleRequest {
 
 message ShuffleResponse {
   repeated Transaction transactions = 10;
-  bytes signature = 20;
+  bytes attestation = 20;
 }

@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/bufbuild/connect-go"
-	"github.com/canary-x/tee-sequencer/gen/proto/go/blockchain/v1/blockchainv1connect"
+	v1 "github.com/canary-x/tee-sequencer/gen/proto/go/blockchain/v1/blockchainv1connect"
 	"github.com/canary-x/tee-sequencer/internal/config"
 	"github.com/canary-x/tee-sequencer/internal/logger"
 	"github.com/mdlayher/vsock"
@@ -28,12 +28,17 @@ func Run() error {
 	}
 	defer ln.Close()
 
+	securityModule, err := InitSecurityModule(cfg)
+	if err != nil {
+		return fmt.Errorf("initializing security module: %w", err)
+	}
+
 	log.Info("Listening for transactions...")
 
 	interceptors := connect.WithInterceptors(ConnectErrorInterceptor())
 	srv := NewConnectServer(cfg.Connect).
-		WithHandler(blockchainv1connect.NewPingServiceHandler(NewPingServiceHandler(), interceptors)).
-		WithHandler(blockchainv1connect.NewSequencerServiceHandler(NewSequencerServiceHandler(), interceptors))
+		WithHandler(v1.NewPingServiceHandler(NewPingServiceHandler(), interceptors)).
+		WithHandler(v1.NewSequencerServiceHandler(NewSequencerServiceHandler(securityModule), interceptors))
 
 	err = srv.Serve(ln)
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
