@@ -58,8 +58,8 @@ fi
 echo "Executing command: $cmd"
 eval "$cmd"
 
-echo "Waiting for enclave to be running..."
-sleep 1000
+echo "Waiting for enclave to start running..."
+sleep 1
 
 check_enclave_running() {
     local timeout=30
