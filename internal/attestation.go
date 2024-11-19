@@ -30,16 +30,16 @@ func InitSecurityModule(cfg config.Config) (NitroSecurityModule, error) {
 			return nil, fmt.Errorf("opening NSM session: %w", err)
 		}
 		// no need to defer closing the session, as it will be closed when the app terminates
-		return &secureNSM{session: sess}, nil
+		return &SecureNSM{session: sess}, nil
 	}
-	return &fakeNSM{}, nil
+	return &FakeNSM{}, nil
 }
 
-type secureNSM struct {
+type SecureNSM struct {
 	session *nsm.Session
 }
 
-func (s *secureNSM) Attest(data []byte) ([]byte, error) {
+func (s *SecureNSM) Attest(data []byte) ([]byte, error) {
 	res, err := s.session.Send(&request.Attestation{
 		UserData: data,
 		Nonce:    int64ToBytes(time.Now().UnixMilli()),
@@ -62,8 +62,8 @@ func int64ToBytes(i int64) []byte {
 	return b
 }
 
-type fakeNSM struct{}
+type FakeNSM struct{}
 
-func (f *fakeNSM) Attest([]byte) ([]byte, error) {
+func (f *FakeNSM) Attest([]byte) ([]byte, error) {
 	return []byte("fake-attestation"), nil
 }

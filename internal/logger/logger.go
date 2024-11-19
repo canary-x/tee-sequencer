@@ -25,7 +25,17 @@ type ZapLogger struct {
 }
 
 func Init(cfg config.Config) Logger {
+	if logger != nil {
+		panic("called logger.Init() twice")
+	}
 	logger = newZapVSockLogger(cfg)
+	return logger
+}
+
+func InitForTests() Logger {
+	if logger == nil {
+		logger = &ZapLogger{zap: initZapLogger().Sugar()}
+	}
 	return logger
 }
 
