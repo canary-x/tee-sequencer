@@ -46,7 +46,7 @@ proto/setup: ## install proto generation dependencies
 
 .PHONY: start
 start: ## start sequencer as a Nitro instance
-	@./scripts/start.sh
+	@./scripts/start-tee.sh
 
 .PHONY: start/debug
 start: ## start sequencer as a Nitro instance in debug mode

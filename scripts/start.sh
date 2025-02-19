@@ -106,7 +106,7 @@ if [ -n "$port_check" ]; then
     pid=$(echo "$port_check" | tail -n 1 | awk '{print $2}')
     if [ "$process_name" = "socat" ]; then
         echo "Killing existing socat process on port $port"
-        sudo kill $pid
+        sudo kill "$pid"
     else
         echo "Error: Port $port is occupied by $process_name (PID: $pid)"
         exit 1
